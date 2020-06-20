@@ -50,7 +50,7 @@ public class UserDao {
             pStm.setString(1, user.getUserName());
             pStm.setString(2, user.getEmail());
             pStm.setString(3, this.hashPassword(user.getPassword()));
-            System.out.println("id:" +user.getId());
+            //System.out.println("id:" +user.getId());
             pStm.setInt(4, user.getId());
             pStm.executeUpdate();
         } catch (Exception e) {
@@ -70,7 +70,7 @@ public class UserDao {
                 user.setEmail(rs.getString("email"));
                 user.setUserName(rs.getString("username"));
                 user.setPassword(rs.getString("password"));
-                System.out.println("Read, id: "+user.getId());
+                //System.out.println("Read, id: "+user.getId());
                 return user;
             }
         } catch (Exception e) {

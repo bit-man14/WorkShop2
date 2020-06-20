@@ -1,5 +1,7 @@
 package pl.coderslab.entity;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -43,6 +45,21 @@ public class DBUtil {
             while (resultSet.next()) {
                 for (String param : columnNames) {
                     System.out.print((resultSet.getString(param)) + "\t");
+                }
+                System.out.println();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void printData(Connection conn, String query, String... columnNames) {
+        
+        try (PreparedStatement statement = conn.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                for (String param : columnNames) {
+                    System.out.print(StringUtils.rightPad(resultSet.getString(param),20));
+                    
                 }
                 System.out.println();
             }
