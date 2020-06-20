@@ -1,3 +1,5 @@
+package pl.codcerslab.entity;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,9 +12,9 @@ public class DBUtil {
     private static final String DB_PASS = "coderslab";
     
     public static Connection conn() {
-        try{
+        try {
             return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-        }catch(SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return conn();
@@ -32,6 +34,20 @@ public class DBUtil {
         }
     }
     
+    public static int getAutoId(Connection conn, String sql, String... params) {
+        try (PreparedStatement statement = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs.next()) {
+                long id = rs.getLong(1);
+                System.out.println("Inserted ID: " + id);
+            }
+    
+        } catch (SQLException sq) {
+        
+        }
+        return -1;
+    }
+    
     //executeQuery
     public static void execSelect(Connection conn, String query, String... columnNames) {
         
@@ -39,7 +55,7 @@ public class DBUtil {
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 for (String param : columnNames) {
-                    System.out.print((resultSet.getString(param))+"\t");
+                    System.out.print((resultSet.getString(param)) + "\t");
                 }
                 System.out.println();
             }

@@ -1,4 +1,6 @@
-public class Users {
+package pl.codcerslab.entity;
+
+public class User {
     private int id;
     private String email;
     private String userName;
