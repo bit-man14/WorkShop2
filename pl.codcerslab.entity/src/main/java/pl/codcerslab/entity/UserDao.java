@@ -1,7 +1,8 @@
 package pl.codcerslab.entity;
 
-import org.mindrot.jbcrypt.BCrypt;
 
+import com.sun.tools.javac.util.ArrayUtils;
+import org.mindrot.jbcrypt.BCrypt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -47,12 +48,6 @@ public class UserDao {
         }
     }
     
-    //pierwsza wersja
-    public static int changeUserData(String userName, String userEmail, String userPass, int userId) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = DBUtil.conn();
-        int r = DBUtil.execUpdate(con1, CHANGE_USER_DATA, userName, userEmail, userPass, String.valueOf(userId));
-        return r;//number of records affected
-    }
     
     //update wg obiektu
     public void update(User user) {
@@ -62,6 +57,7 @@ public class UserDao {
             pStm.setString(2, user.getEmail());
             pStm.setString(3, this.hashPassword(user.getPassword()));
             pStm.setInt(4, user.getId());
+            pStm.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,6 +83,28 @@ public class UserDao {
         return null;
     }
     
+    //dane z tabeli do obiektu, wg id
+    public static User[] readAllUsers() {
+        try (Connection conn = DBUtil.conn()) {
+            User[] users = new User[0];
+            PreparedStatement statement = conn.prepareStatement("SELECT * FROM users");
+            statement.setString(1, "IS NOT NULL");
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setEmail(rs.getString("email"));
+                user.setUserName(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                users
+            }
+            return users;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     
     public static int removeUserData(int userId) throws SQLIntegrityConstraintViolationException {
         Connection con1 = DBUtil.conn();
@@ -104,7 +122,8 @@ public class UserDao {
         DBUtil.execSelect(con1, "SELECT * FROM users", "email", "username", "password");
     }
     
-    public  String hashPassword(String password) {
+    //hashowanie hasła
+    public static String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
     
