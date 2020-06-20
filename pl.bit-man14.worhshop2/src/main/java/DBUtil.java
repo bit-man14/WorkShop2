@@ -39,7 +39,7 @@ public class DBUtil {
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 for (String param : columnNames) {
-                    System.out.print((resultSet.getString(param)));
+                    System.out.print((resultSet.getString(param))+"\t");
                 }
                 System.out.println();
             }

@@ -17,14 +17,28 @@ public class UserDao {
         int r = DBUtil.execUpdate(con1, CREATE_USER_QUERY, userName, userEmail, userPass);
         return r;//number of records affected
     }
-    public static int changeUserData(String userName, String userEmail, String userPass,int userId) throws SQLIntegrityConstraintViolationException {
+    
+    public static int changeUserData(String userName, String userEmail, String userPass, int userId) throws SQLIntegrityConstraintViolationException {
         Connection con1 = DBUtil.conn();
-        int r = DBUtil.execUpdate(con1,CHANGE_USER_DATA, userName, userEmail, userPass, String.valueOf(userId));
+        int r = DBUtil.execUpdate(con1, CHANGE_USER_DATA, userName, userEmail, userPass, String.valueOf(userId));
         return r;//number of records affected
     }
-    public static int removeUserData(String userName, String userEmail, String userPass,int userId) throws SQLIntegrityConstraintViolationException {
+    
+    public static int removeUserData(int userId) throws SQLIntegrityConstraintViolationException {
         Connection con1 = DBUtil.conn();
-        int r = DBUtil.execUpdate(con1,CHANGE_USER_DATA, userName, userEmail, userPass, String.valueOf(userId));
+        int r = DBUtil.execUpdate(con1, DELETE_USER_DATA, String.valueOf(userId));
         return r;//number of records affected
     }
+    public static void printUserData(int userId) throws SQLIntegrityConstraintViolationException {
+        Connection con1 = DBUtil.conn();
+        DBUtil.execSelect(con1, "SELECT * FROM users WHERE id="+userId+";", "id","email","username","password");
+    }
+    public static void printAllUserData() throws SQLIntegrityConstraintViolationException {
+        Connection con1 = DBUtil.conn();
+        DBUtil.execSelect(con1, "SELECT * FROM users","email","username","password");
+    }
+    
+    
+    
+    
 }
