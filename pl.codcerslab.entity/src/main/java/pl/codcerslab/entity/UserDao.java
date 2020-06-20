@@ -18,15 +18,17 @@ public class UserDao {
             "SELECT * FROM users WHERE id=?";
     private static final String DELETE_USER_DATA =
             "DELETE FROM users WHERE id=?";
+    
     //pierwsza wersja
     public static int addNewUser(String userName, String userEmail, String userPass) throws SQLIntegrityConstraintViolationException {
         Connection con1 = pl.codcerslab.entity.DBUtil.conn();
         int r = pl.codcerslab.entity.DBUtil.execUpdate(con1, CREATE_USER_QUERY, userName, userEmail, userPass);
         return r;//number of records affected
     }
+    
     //dane z obiektu klasy User
     public static User create(User user) {
-        try (Connection conn = pl.codcerslab.entity.DBUtil.conn()) {
+        try (Connection conn = DBUtil.conn()) {
             PreparedStatement statement =
                     conn.prepareStatement(CREATE_USER_QUERY, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, user.getUserName());
@@ -47,35 +49,62 @@ public class UserDao {
     
     //pierwsza wersja
     public static int changeUserData(String userName, String userEmail, String userPass, int userId) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = pl.codcerslab.entity.DBUtil.conn();
-        int r = pl.codcerslab.entity.DBUtil.execUpdate(con1, CHANGE_USER_DATA, userName, userEmail, userPass, String.valueOf(userId));
+        Connection con1 = DBUtil.conn();
+        int r = DBUtil.execUpdate(con1, CHANGE_USER_DATA, userName, userEmail, userPass, String.valueOf(userId));
         return r;//number of records affected
     }
-    //dane z obiektu klasy User
-    public static int update(int userId) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = pl.codcerslab.entity.DBUtil.conn();
-        int r = pl.codcerslab.entity.DBUtil.execUpdate(con1, CHANGE_USER_DATA, userName, userEmail, userPass, String.valueOf(userId));
-        return r;//number of records affected
+    
+    //update wg obiektu
+    public void update(User user) {
+        try (Connection conn = DBUtil.conn()) {
+            PreparedStatement pStm = conn.prepareStatement(CHANGE_USER_DATA);
+            pStm.setString(1, user.getUserName());
+            pStm.setString(2, user.getEmail());
+            pStm.setString(3, this.hashPassword(user.getPassword()));
+            pStm.setInt(4, user.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    //dane z tabeli do obiektu, wg id
+    public static User read(int userId) {
+        try (Connection conn = DBUtil.conn()) {
+            PreparedStatement statement = conn.prepareStatement(READ_USER_DATA);
+            statement.setInt(1, userId);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setEmail(rs.getString("email"));
+                user.setUserName(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                return user;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     
     public static int removeUserData(int userId) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = pl.codcerslab.entity.DBUtil.conn();
-        int r = pl.codcerslab.entity.DBUtil.execUpdate(con1, DELETE_USER_DATA, String.valueOf(userId));
+        Connection con1 = DBUtil.conn();
+        int r = DBUtil.execUpdate(con1, DELETE_USER_DATA, String.valueOf(userId));
         return r;//number of records affected
     }
     
     public static void printUserData(int userId) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = pl.codcerslab.entity.DBUtil.conn();
-        pl.codcerslab.entity.DBUtil.execSelect(con1, "SELECT * FROM users WHERE id=" + userId + ";", "id", "email", "username", "password");
+        Connection con1 = DBUtil.conn();
+        DBUtil.execSelect(con1, "SELECT * FROM users WHERE id=" + userId + ";", "id", "email", "username", "password");
     }
     
     public static void printAllUserData() throws SQLIntegrityConstraintViolationException {
-        Connection con1 = pl.codcerslab.entity.DBUtil.conn();
-        pl.codcerslab.entity.DBUtil.execSelect(con1, "SELECT * FROM users", "email", "username", "password");
+        Connection con1 = DBUtil.conn();
+        DBUtil.execSelect(con1, "SELECT * FROM users", "email", "username", "password");
     }
     
-    public static String hashPassword(String password) {
+    public  String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
     

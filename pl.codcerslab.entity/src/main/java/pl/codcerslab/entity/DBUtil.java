@@ -34,19 +34,6 @@ public class DBUtil {
         }
     }
     
-    public static int getAutoId(Connection conn, String sql, String... params) {
-        try (PreparedStatement statement = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            ResultSet rs = statement.getGeneratedKeys();
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                System.out.println("Inserted ID: " + id);
-            }
-    
-        } catch (SQLException sq) {
-        
-        }
-        return -1;
-    }
     
     //executeQuery
     public static void execSelect(Connection conn, String query, String... columnNames) {
