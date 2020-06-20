@@ -1,4 +1,4 @@
-package pl.codcerslab.entity;
+package pl.coderslab.entity;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,7 +10,7 @@ public class DBUtil {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/workshop2?useSSL=false&characterEncoding=utf8&serverTimezone=UTC";
     private static final String DB_USER = "root";
     private static final String DB_PASS = "coderslab";
-    
+    //podłączenie do bazy
     public static Connection conn() {
         try {
             return DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
@@ -20,7 +20,7 @@ public class DBUtil {
         return conn();
     }
     
-    //executeUpdate
+    //executeUpdate - zmiany w tabeli
     public static int execUpdate(Connection conn, String sql, String... params) {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
@@ -35,7 +35,7 @@ public class DBUtil {
     }
     
     
-    //executeQuery
+    //executeQuery - odczyt z tabeli
     public static void execSelect(Connection conn, String query, String... columnNames) {
         
         try (PreparedStatement statement = conn.prepareStatement(query);

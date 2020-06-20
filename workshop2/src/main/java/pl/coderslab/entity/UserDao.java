@@ -1,13 +1,12 @@
-package pl.codcerslab.entity;
+package pl.coderslab.entity;
 
 
-import com.sun.tools.javac.util.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.mindrot.jbcrypt.BCrypt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 
 public class UserDao {
@@ -20,15 +19,10 @@ public class UserDao {
     private static final String DELETE_USER_DATA =
             "DELETE FROM users WHERE id=?";
     
-    //pierwsza wersja
-    public static int addNewUser(String userName, String userEmail, String userPass) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = pl.codcerslab.entity.DBUtil.conn();
-        int r = pl.codcerslab.entity.DBUtil.execUpdate(con1, CREATE_USER_QUERY, userName, userEmail, userPass);
-        return r;//number of records affected
-    }
+  
     
-    //dane z obiektu klasy User
-    public static User create(User user) {
+    //nowe dane z obiektu klasy User - do DB
+    public  User create(User user) {
         try (Connection conn = DBUtil.conn()) {
             PreparedStatement statement =
                     conn.prepareStatement(CREATE_USER_QUERY, Statement.RETURN_GENERATED_KEYS);
@@ -49,13 +43,14 @@ public class UserDao {
     }
     
     
-    //update wg obiektu
+    //update tabeli wg obiektu
     public void update(User user) {
         try (Connection conn = DBUtil.conn()) {
             PreparedStatement pStm = conn.prepareStatement(CHANGE_USER_DATA);
             pStm.setString(1, user.getUserName());
             pStm.setString(2, user.getEmail());
             pStm.setString(3, this.hashPassword(user.getPassword()));
+            System.out.println("id:" +user.getId());
             pStm.setInt(4, user.getId());
             pStm.executeUpdate();
         } catch (Exception e) {
@@ -64,17 +59,18 @@ public class UserDao {
     }
     
     //dane z tabeli do obiektu, wg id
-    public static User read(int userId) {
+    public  User read(int userId) {
         try (Connection conn = DBUtil.conn()) {
             PreparedStatement statement = conn.prepareStatement(READ_USER_DATA);
             statement.setInt(1, userId);
             ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
+            if (rs.next()) {
                 User user = new User();
                 user.setId(rs.getInt("id"));
                 user.setEmail(rs.getString("email"));
                 user.setUserName(rs.getString("username"));
                 user.setPassword(rs.getString("password"));
+                System.out.println("Read, id: "+user.getId());
                 return user;
             }
         } catch (Exception e) {
@@ -83,12 +79,12 @@ public class UserDao {
         return null;
     }
     
-    //dane z tabeli do obiektu, wg id
-    public static User[] readAllUsers() {
+    //dane z całej tabeli DB do tablicy obiektów
+    public  User[] readAllUsers() {
         try (Connection conn = DBUtil.conn()) {
             User[] users = new User[0];
             PreparedStatement statement = conn.prepareStatement("SELECT * FROM users");
-            statement.setString(1, "IS NOT NULL");
+            //statement.setString("");
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 User user = new User();
@@ -96,36 +92,27 @@ public class UserDao {
                 user.setEmail(rs.getString("email"));
                 user.setUserName(rs.getString("username"));
                 user.setPassword(rs.getString("password"));
-                users
+                users = ArrayUtils.add(users, user);
             }
             return users;
-            
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
     
-    public static int removeUserData(int userId) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = DBUtil.conn();
-        int r = DBUtil.execUpdate(con1, DELETE_USER_DATA, String.valueOf(userId));
-        return r;//number of records affected
+    public  void removeUserData(int userId) {
+        try (Connection con1 = DBUtil.conn()) {
+            PreparedStatement pStm = con1.prepareStatement(DELETE_USER_DATA);
+            pStm.setInt(1, userId);
+            pStm.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-    
-    public static void printUserData(int userId) throws SQLIntegrityConstraintViolationException {
-        Connection con1 = DBUtil.conn();
-        DBUtil.execSelect(con1, "SELECT * FROM users WHERE id=" + userId + ";", "id", "email", "username", "password");
-    }
-    
-    public static void printAllUserData() throws SQLIntegrityConstraintViolationException {
-        Connection con1 = DBUtil.conn();
-        DBUtil.execSelect(con1, "SELECT * FROM users", "email", "username", "password");
-    }
-    
+
     //hashowanie hasła
-    public static String hashPassword(String password) {
+    public  String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
-    
-    
 }
